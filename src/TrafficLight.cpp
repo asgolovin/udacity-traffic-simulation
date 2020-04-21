@@ -45,6 +45,7 @@ void TrafficLight::waitForGreen()
     // Once it receives TrafficLightPhase::green, the method returns.
     while (true){
         if (_messageQueue.receive() == TrafficLightPhase::green) return;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
@@ -72,15 +73,16 @@ void TrafficLight::cycleThroughPhases()
     auto t2(t1);
     
     // generate random cycle duration between 4 and 6 seconds
-    std::default_random_engine generator;
+    std::random_device rd;
+    std::mt19937 rng(rd());
     std::uniform_int_distribution<int> distribution(4000, 6000);
-    int cycleDuration = distribution(generator);
+    int cycleDuration = distribution(rng);
 
     while (true){
         t2 = std::chrono::high_resolution_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() > cycleDuration){
             t1 = t2;
-            cycleDuration = distribution(generator);
+            cycleDuration = distribution(rng);
             switch(_currentPhase){
                 case TrafficLightPhase::green :
                   _currentPhase = TrafficLightPhase::red;
